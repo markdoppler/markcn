@@ -84,7 +84,7 @@ async function initScript({ moduleType }) {
       logMessage('Git repository initialized.', 'green');
   
       // **Step 9: Copy .gitignore from templates**
-      const gitignoreTemplatePath = path.join(templatesDir, '.gitignore');
+      const gitignoreTemplatePath = path.join(templatesDir, 'gitignore');
       const gitignoreTemplate = await fs.readFile(gitignoreTemplatePath, 'utf8');
       await fs.writeFile('.gitignore', gitignoreTemplate);
       logMessage('.gitignore file created from the template.', 'green');
