@@ -3,6 +3,8 @@ import { program } from 'commander';
 import initCommand from './commands/init.js';
 import addCommand from './commands/add/index.js';
 
+process.noDeprecation = true;
+
 // CLI version configuration and description
 program
   .version('1.0.0')
@@ -12,7 +14,7 @@ program
   .command('test')
   .description('Initialize a project with Express and create app.js')
   .action(async () => {
-    console.log("test")
+    console.log("test2")
   });
 
 // Define the "init" command
