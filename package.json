@@ -1,6 +1,6 @@
 {
     "name": "markcn",
-    "version": "1.0.3",
+    "version": "0.0.4",
     "description": "CLI to speed up the creation of backends in NodeJS",
     "main": "index.js",
     "type": "module",
