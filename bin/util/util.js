@@ -85,10 +85,6 @@ export const addImport = async (importPath) => {
             if (!appJsContent.includes(esmImportStatement)) {
                 // If it doesn't exist, add the import
                 appJsContent += `\n${esmImportStatement}`;
-                await fs.writeFile(appJsPath, appJsContent);
-                logMessage(`${importPath} import added to app.js for ESM.`, 'green');
-            } else {
-                logMessage(`${importPath} import already exists in app.js for ESM.`, 'yellow');
             }
         } else if (moduleType === 'CommonJS') {
             const cjsRequireStatement = `require('${importPath}');`;
@@ -97,12 +93,20 @@ export const addImport = async (importPath) => {
             if (!appJsContent.includes(cjsRequireStatement)) {
                 // If it doesn't exist, add the require
                 appJsContent += `\n${cjsRequireStatement}`;
-                await fs.writeFile(appJsPath, appJsContent);
-                logMessage(`${importPath} import added to app.js for CommonJS.`, 'green');
-            } else {
-                logMessage(`${importPath} import already exists in app.js for CommonJS.`, 'yellow');
             }
         }
+
+        // Split the content into lines and sort them
+        const lines = appJsContent.split('\n').filter(line => line.trim() !== '');
+        const libImports = lines.filter(line => line.includes('libs'));
+        const controllerImports = lines.filter(line => line.includes('controllers'));
+
+        // Combine the sorted imports
+        const sortedContent = [...libImports, '', ...controllerImports].join('\n');
+
+        // Write the sorted content back to app.js
+        await fs.writeFile(appJsPath, sortedContent);
+        logMessage(`${importPath} import added to app.js and sorted.`, 'green');
     } catch (error) {
         logMessage(`Error adding import to app.js: ${error.message}`, 'red');
     }
