@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import inquirer from 'inquirer';
 import { logMessage } from '../../libs/chalk.js'; // Ajusta la ruta según sea necesario
-import { __dirname, getModuleType, getRootPath, fileExists } from '../../util/util.js'; // Reutiliza fileExists de util.js
+import { __dirname, getModuleType, getRootPath, fileExists, addImport, capitalize } from '../../util/util.js'; // Reutiliza fileExists de util.js
 
 const addController = async () => {
 
@@ -43,27 +43,28 @@ const addController = async () => {
     // Step 5: Preparar el contenido de la plantilla
     const controllerVariableName = `${controllerName}Controller`;
 
-    const esmTemplateContent = `const ${controllerVariableName} = {};
+    const esmTemplateContent = `import { app } from "../libs/express.js";
 
-${controllerVariableName}.helloWorld = (req, res) => {
-    res.send('Hello World from ${controllerName} controller!');
-};
-
-export default ${controllerVariableName};
+app.get('/${controllerName}', (req, res) => {
+    res.send('${capitalize(controllerName)} controller');
+});
 `;
 
-    const commonJsTemplateContent = `const ${controllerVariableName} = {};
+    const commonJsTemplateContent = `const { app } = require('../libs/express.js');
 
-${controllerVariableName}.helloWorld = (req, res) => {
-    res.send('Hello World from ${controllerName} controller!');
-}
-
-module.exports = ${controllerVariableName};
+app.get('/${controllerName}', (req, res) => {
+    res.send('${capitalize(controllerName)} controller');
+});
 `;
 
     // Step 6: Escribir el contenido de la plantilla en el archivo del controller
     await fs.writeFile(filePath, moduleType === 'ESM' ? esmTemplateContent : commonJsTemplateContent);
     logMessage(`Controller file created at ${filePath}`, 'green');
+
+    // Step 7: Importar el nuevo controller en app.js
+    const importPath = `./src/controllers/${fileName}`;
+    await addImport(importPath);
+    logMessage(`Controller imported in app.js`, 'green');
   } catch (error) {
     logMessage(`Error creating controller: ${error.message}`, 'red');
   }
