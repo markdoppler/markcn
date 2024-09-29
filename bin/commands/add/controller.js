@@ -41,7 +41,6 @@ const addController = async () => {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
 
     // Step 5: Preparar el contenido de la plantilla
-    const controllerVariableName = `${controllerName}Controller`;
 
     const esmTemplateContent = `import { app } from "../libs/express.js";
 
