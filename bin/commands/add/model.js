@@ -72,9 +72,14 @@ const addMongooseModel = async () => {
 
     }
 
-
-
     logMessage('Generated schema:', 'cyan');
+
+    if (mongooseSchema) {
+      mongooseSchema.fields.forEach(({ name, type }) => {
+        logMessage(`${name}: ${type}`, 'cyan');
+      }
+      );
+    }
 
     const moduleType = await getModuleType();
 
@@ -92,8 +97,6 @@ const addMongooseModel = async () => {
 
     // Step 6: Create the /src/models folder if it doesn't exist
     await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-    console.log({ mongooseSchema })
 
     // Step 7: Prepare the model template based on the generated schema
     const esmTemplateContent = `
