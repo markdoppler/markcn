@@ -46,15 +46,13 @@ const addController = async () => {
 
 app.get('/${controllerName}', (req, res) => {
     res.send('${capitalize(controllerName)} controller');
-});
-`;
+});`;
 
     const commonJsTemplateContent = `const { app } = require('../libs/express.js');
 
 app.get('/${controllerName}', (req, res) => {
     res.send('${capitalize(controllerName)} controller');
-});
-`;
+});`;
 
     // Step 6: Write the template content to the controller file
     await fs.writeFile(filePath, moduleType === 'ESM' ? esmTemplateContent : commonJsTemplateContent);

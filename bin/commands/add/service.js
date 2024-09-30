@@ -49,8 +49,7 @@ ${serviceVariableName}.helloWorld = () => {
     return 'Hello World!';
 };
 
-export default ${serviceVariableName};
-`;
+export default ${serviceVariableName};`;
 
     const commonJsTemplateContent = `const ${serviceVariableName} = {};
 
@@ -58,8 +57,7 @@ ${serviceVariableName}.helloWorld = () => {
     return 'Hello World!';
 }
 
-module.exports = ${serviceVariableName};
-`;
+module.exports = ${serviceVariableName};`;
 
     // Step 6: Escribir el contenido de la plantilla en el archivo del servicio
     await fs.writeFile(filePath, moduleType === 'ESM' ? esmTemplateContent : commonJsTemplateContent);

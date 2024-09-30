@@ -89,8 +89,7 @@ const ${modelName}Schema = new Schema({
 
 const ${capitalize(modelName)} = mongoose.model('${capitalize(modelName)}', ${modelName}Schema);
 
-export default ${capitalize(modelName)};
-`;
+export default ${capitalize(modelName)};`;
 
     const commonJsTemplateContent = `
 const mongoose = require('mongoose');
@@ -102,8 +101,7 @@ const ${modelName}Schema = new Schema({
 
 const ${capitalize(modelName)} = mongoose.model('${capitalize(modelName)}', ${modelName}Schema);
 
-module.exports = ${capitalize(modelName)};
-`;
+module.exports = ${capitalize(modelName)};`;
 
     // Step 8: Write the model file based on module type (ESM or CommonJS)
     await fs.writeFile(filePath, moduleType === 'ESM' ? esmTemplateContent : commonJsTemplateContent);
