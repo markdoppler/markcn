@@ -20,7 +20,10 @@ export const readTemplateFile = async (filename, moduleType, templatesDir) => {
 // Function to determine the module type from package.json
 export const getModuleType = async () => {
     try {
-        const packageJsonPath = path.join(process.cwd(), 'package.json');
+
+        const rootPath = await getRootPath();
+
+        const packageJsonPath = path.join(rootPath, 'package.json');
         const packageJsonData = await fs.readFile(packageJsonPath, 'utf8');
         const packageJson = JSON.parse(packageJsonData);
 
