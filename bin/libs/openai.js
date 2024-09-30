@@ -3,8 +3,10 @@ import { getEnvVariable } from "../util/util.js";
 
 export default async function initOpenAI() {
 
+    const { value, error } = await getEnvVariable("MARKCN_OPENAI_API_KEY");
+
     const openai = new OpenAI({
-        apiKey: await getEnvVariable("OPENAI_API_KEY")
+        apiKey: value
     });
 
     return openai;

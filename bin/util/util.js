@@ -36,36 +36,32 @@ export const getModuleType = async () => {
 
 // Function to get an environment variable from the .env file
 export const getEnvVariable = async (key) => {
-    const rootPath = await getRootPath(); // Use the getRootPath function to find the project root
+
+    const rootPath = await getRootPath();
     const envPath = path.join(rootPath, '.env');
 
-    try {
-        // Read the content of the .env file
-        const envContent = await fs.readFile(envPath, 'utf8');
+    // Read the content of the .env file
+    const envContent = await fs.readFile(envPath, 'utf8');
 
-        // Split the content by lines
-        const lines = envContent.split('\n');
+    // Split the content by lines
+    const lines = envContent.split('\n');
 
-        // Find the line that contains the variable
-        const line = lines.find((line) => line.startsWith(`${key}=`));
+    // Find the line that contains the variable
+    const line = lines.find((line) => line.startsWith(`${key}=`));
 
-        if (!line) {
-            throw new Error(`Environment variable ${key} not found in .env file.`);
-        }
-
-        // Extract the value of the variable (after the "=")
-        const value = line.split('=')[1]?.trim();
-
-        if (!value) {
-            throw new Error(`No value assigned to the environment variable ${key} in .env file.`);
-        }
-
-        return value;
-
-    } catch (error) {
-        logMessage(`Error reading environment variable ${key}: ${error.message}`, 'red');
-        throw error;
+    if (!line) {
+        return { error: `The environment variable ${key} was not found in the .env file.` };
     }
+
+    // Extract the value of the variable (after the "=")
+    const value = line.split('=')[1]?.trim();
+
+    if (!value) {
+        return { error: `The environment variable ${key} is empty in the .env file.` };
+    }
+
+    return { value };
+
 };
 
 // Function to add an import statement to app.js based on the module type

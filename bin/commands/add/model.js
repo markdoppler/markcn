@@ -2,18 +2,20 @@ import fs from 'fs/promises';
 import path from 'path';
 import inquirer from 'inquirer';
 import { logMessage } from '../../libs/chalk.js'; // Adjust the path as needed
-import { __dirname, getModuleType, getRootPath, fileExists, openaiResponseFormat, capitalize } from '../../util/util.js'; 
+import { __dirname, getModuleType, getRootPath, fileExists, openaiResponseFormat, capitalize, getEnvVariable } from '../../util/util.js';
 import { z } from 'zod';
 
 // Define the function to create a Mongoose model
 const addMongooseModel = async () => {
+
   try {
-    // Step 1: Ask the user for the model name and fields
-    const answers = await inquirer.prompt([
+
+    const answerList = [
       {
         type: 'input',
         name: 'modelName',
         message: 'Please enter the name of the model:',
+        parse: (input) => input.toLowerCase(),
         validate: (input) => {
           if (!input.trim()) {
             return 'Model name cannot be empty.';
@@ -21,41 +23,56 @@ const addMongooseModel = async () => {
           return true;
         },
       },
-      {
+    ];
+
+    const { value: MARKCN_OPENAI_API_KEY } = await getEnvVariable('MARKCN_OPENAI_API_KEY');
+
+    if (MARKCN_OPENAI_API_KEY) {
+      answerList.push({
         type: 'input',
         name: 'fields',
         message: 'Please enter the fields for the model (comma-separated), or leave blank for AI-generated fields:',
-      },
-    ]);
+      });
+    }
+
+    // Step 1: Ask the user for the model name and fields
+    const answers = await inquirer.prompt(answerList);
 
     const { modelName, fields } = answers;
     let prompt;
+    let mongooseSchema;
 
-    if (fields.trim()) {
-      prompt = `Create a ${modelName} Mongoose schema with fields: ${fields}`;
-    } else {
-      logMessage('Generating fields using AI...', 'yellow');
-      prompt = `Create a ${modelName} Mongoose schema with appropriate fields for this type of model. Generate between 3 and 6 fields.`;
+    if (MARKCN_OPENAI_API_KEY) {
+
+      if (fields.trim()) {
+        prompt = `Create a ${modelName} Mongoose schema with fields: ${fields}`;
+      } else {
+        logMessage('Generating fields using AI...', 'yellow');
+        prompt = `Create a ${modelName} Mongoose schema with appropriate fields for this type of model. Generate between 3 and 6 fields.`;
+      }
+
+      // Step 2: Define the Zod schema to validate the Mongoose model
+      const MongooseModelSchema = z.object({
+        name: z.string(),
+        fields: z.array(
+          z.object({
+            name: z.string(),
+            type: z.enum(["String", "Number", "Date", "Boolean"]),
+          })
+        ),
+      });
+
+      // Step 3: Use OpenAI to generate the Mongoose schema
+      mongooseSchema = await openaiResponseFormat({
+        schema: MongooseModelSchema,
+        prompt,
+        instruction: "You are a Mongoose schema generator AI. Convert the user input into a Mongoose schema, or generate appropriate fields if none were provided.",
+        zodName: 'mongooseModel',
+      });
+
     }
 
-    // Step 2: Define the Zod schema to validate the Mongoose model
-    const MongooseModelSchema = z.object({
-      name: z.string(),
-      fields: z.array(
-        z.object({
-          name: z.string(),
-          type: z.enum(["String", "Number", "Date", "Boolean"]),
-        })
-      ),
-    });
 
-    // Step 3: Use OpenAI to generate the Mongoose schema
-    const mongooseSchema = await openaiResponseFormat({
-      schema: MongooseModelSchema,
-      prompt,
-      instruction: "You are a Mongoose schema generator AI. Convert the user input into a Mongoose schema, or generate appropriate fields if none were provided.",
-      zodName: 'mongooseModel',
-    });
 
     logMessage('Generated schema:', 'cyan');
 
@@ -84,7 +101,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const ${modelName}Schema = new Schema({
-  ${mongooseSchema.fields.map(({ name, type }) => `${name}: { type: ${type} }`).join(',\n  ')}
+  ${mongooseSchema ? mongooseSchema.fields.map(({ name, type }) => `${name}: { type: ${type} }`).join(',\n  ') : ""}
 });
 
 const ${capitalize(modelName)} = mongoose.model('${capitalize(modelName)}', ${modelName}Schema);
@@ -96,7 +113,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const ${modelName}Schema = new Schema({
-  ${mongooseSchema.fields.map(({ name, type }) => `${name}: { type: ${type} }`).join(',\n  ')}
+  ${mongooseSchema ? mongooseSchema.fields.map(({ name, type }) => `${name}: { type: ${type} }`).join(',\n  ') : ""}
 });
 
 const ${capitalize(modelName)} = mongoose.model('${capitalize(modelName)}', ${modelName}Schema);
