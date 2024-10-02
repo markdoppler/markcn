@@ -13,6 +13,7 @@ const addController = async () => {
         type: 'input',
         name: 'controllerName',
         message: 'Please enter the name of the controller:',
+        parse: (input) => input.toLowerCase(),
         validate: (input) => {
           if (!input.trim()) {
             return 'Controller name cannot be empty.';
@@ -22,7 +23,7 @@ const addController = async () => {
       },
     ]);
 
-    const controllerName = answers.controllerName.trim();
+    const controllerName = answers.controllerName.toLowerCase();
     const moduleType = await getModuleType();
 
     // Step 2: Define the file name and path
@@ -33,7 +34,7 @@ const addController = async () => {
     // Step 3: Check if the file already exists using fileExists
     const fileAlreadyExists = await fileExists(filePath);
     if (fileAlreadyExists) {
-      logMessage(`Error: Controller file already exists at ${filePath}. Operation aborted.`, 'red');
+      logMessage(`Error: Controller file already exists at ${filePath}. Operation aborted.`, 'error');
       return; // Stop execution if the file already exists
     }
 
@@ -56,14 +57,17 @@ app.get('/${controllerName}', (req, res) => {
 
     // Step 6: Write the template content to the controller file
     await fs.writeFile(filePath, moduleType === 'ESM' ? esmTemplateContent : commonJsTemplateContent);
-    logMessage(`Controller file created at ${filePath}`, 'green');
+    logMessage(`Controller file created at ${filePath}`, 'write');
 
     // Step 7: Import the new controller in app.js
     const importPath = `./src/controllers/${fileName}`;
+
     await addImport(importPath);
-    logMessage(`Controller imported in app.js`, 'green');
+
+    logMessage(`Controller imported in app.js`, 'write');
+
   } catch (error) {
-    logMessage(`Error creating controller: ${error.message}`, 'red');
+    logMessage(`Error creating controller: ${error.message}`, 'error');
   }
 };
 

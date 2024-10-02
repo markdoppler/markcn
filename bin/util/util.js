@@ -29,7 +29,7 @@ export const getModuleType = async () => {
 
         return packageJson.type === 'module' ? 'ESM' : 'CommonJS';
     } catch (error) {
-        logMessage('Error reading package.json or determining module type. Defaulting to CommonJS.', 'yellow');
+        logMessage('Error reading package.json or determining module type. Defaulting to CommonJS.', 'error');
         return 'CommonJS'; // Default to CommonJS if there's an error
     }
 };
@@ -105,9 +105,9 @@ export const addImport = async (importPath) => {
 
         // Write the sorted content back to app.js
         await fs.writeFile(appJsPath, sortedContent);
-        logMessage(`${importPath} import added to app.js and sorted.`, 'green');
+        logMessage(`${importPath} import added to app.js and sorted.`, 'write');
     } catch (error) {
-        logMessage(`Error adding import to app.js: ${error.message}`, 'red');
+        logMessage(`Error adding import to app.js: ${error.message}`, 'error');
     }
 };
 
@@ -154,7 +154,7 @@ export const addEnvVariable = async (key, value) => {
         // Read the existing content of the .env file
         envContent = await fs.readFile(envPath, 'utf8');
     } catch (error) {
-        logMessage('.env file does not exist. Creating a new one...', 'yellow');
+        logMessage('.env file does not exist. Creating a new one...', 'write');
     }
 
     // Check if the variable already exists in the .env file
@@ -168,7 +168,7 @@ export const addEnvVariable = async (key, value) => {
 
     // Write the updated content to the .env file
     await fs.writeFile(envPath, envContent);
-    logMessage(`${key} added to .env file.`, 'green');
+    logMessage(`${key} added to .env file.`, 'env');
 };
 
 // Define the function that accepts the schema and prompt

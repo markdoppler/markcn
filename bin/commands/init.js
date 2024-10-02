@@ -10,50 +10,47 @@ const exec = promisify(execCallback); // Promisify the exec function to use it w
 
 async function initScript({ moduleType, openAiApiKey }) {
 
-    console.log({ moduleType })
-
     try {
-        logMessage('Running the "init" command...', 'cyan');
+        logMessage('Running the "init" command...', null, 'cyan');
 
         // Step 1: Initialize npm
         await exec('npm init -y');
-        logMessage('npm initialized.', 'green');
+        logMessage('NPM initialized.');
 
         // Step 2: Install Express
         await exec('npm install express');
-        logMessage('Express installed.', 'green');
+        logMessage('express installed.', 'npm');
 
         // Install dotenv package for environment variables management
         await exec('npm install dotenv');
-        logMessage('DotEnv installed.', 'green');
+        logMessage('dotenv installed.', 'npm');
 
         // **Additional Step: Install nodemon as a development dependency**
         await exec('npm install nodemon --save-dev');
-        logMessage('nodemon installed as a development dependency.', 'green');
+        logMessage('nodemon installed as a development dependency.', 'npm');
 
         // Step 3: Create necessary directories
         await fs.mkdir(path.join('src', 'libs'), { recursive: true });
-        logMessage('Directory src/libs created.', 'green');
+        logMessage('Directory src/libs created.', 'write');
 
         await fs.mkdir(path.join('src', 'services'), { recursive: true });
-        logMessage('Directory src/services created.', 'green');
+        logMessage('Directory src/services created.', 'write');
 
         await fs.mkdir(path.join('src', 'controllers'), { recursive: true });
-        logMessage('Directory src/controllers created.', 'green');
+        logMessage('Directory src/controllers created.', 'write');
 
         // Adjust the path to the templates folder
         const templatesDir = path.join(__dirname, '../templates/init');
-        logMessage(`Templates directory: ${templatesDir}`, 'blue');
 
         // Step 4: Read and write src/libs/express.js from the template
         const expressLibTemplate = await readTemplateFile('express', moduleType, templatesDir);
         await fs.writeFile(path.join('src', 'libs', 'express.js'), expressLibTemplate);
-        logMessage('File src/libs/express.js created from the template.', 'green');
+        logMessage('File src/libs/express.js created.', 'write');
 
         // Step 6: Read and write app.js from the template
         const appTemplate = await readTemplateFile('app', moduleType, templatesDir);
         await fs.writeFile('app.js', appTemplate);
-        logMessage('File app.js created from the template.', 'green');
+        logMessage('File app.js created.', 'write');
 
         // Agregar service y controller
         const serviceTemplate = await readTemplateFile('service', moduleType, templatesDir);
@@ -70,7 +67,6 @@ async function initScript({ moduleType, openAiApiKey }) {
         // Add the OpenAI API_KEY to the .env file
         if (openAiApiKey) {
             await addEnvVariable('MARKCN_OPENAI_API_KEY', openAiApiKey);
-            logMessage('OpenAI API_KEY added to the .env file.', 'green');
         }
 
         // **Step 7: Modify package.json to add the "dev" script**
@@ -83,26 +79,29 @@ async function initScript({ moduleType, openAiApiKey }) {
         packageJson.type = moduleType === 'ESM' ? 'module' : 'commonjs';
 
         await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
-        logMessage('Script "dev" added to package.json.', 'green');
+        logMessage('Script "dev" added to package.json.', "write");
 
         // **Step 8: Initialize a Git repository**
         await exec('git init');
-        logMessage('Git repository initialized.', 'green');
+        logMessage('Git repository initialized.');
 
         // **Step 9: Copy .gitignore from templates**
         const gitignoreTemplatePath = path.join(templatesDir, 'gitignore');
         const gitignoreTemplate = await fs.readFile(gitignoreTemplatePath, 'utf8');
         await fs.writeFile('.gitignore', gitignoreTemplate);
-        logMessage('.gitignore file created from the template.', 'green');
+        logMessage('.gitignore file created from the template.', "write");
 
-        logMessage('Project initialized successfully!', 'green');
+        logMessage('Project initialized successfully!');
+
     } catch (error) {
-        logMessage(`Error during initialization: ${error.message}`, 'red');
+        logMessage(`Error during initialization: ${error.message}`, "error");
     }
 }
 
 
 async function initCommand({ str, options }) {
+
+
 
     inquirer
         .prompt([
@@ -130,11 +129,6 @@ async function initCommand({ str, options }) {
         .catch((error) => {
             console.error('An error occurred:', error);
         });
-
-    console.log({ str, options });
-
-    return;
-
 
 }
 

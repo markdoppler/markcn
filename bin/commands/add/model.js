@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 const generateMongooseSchema = async (modelName, fields) => {
 
-  logMessage('Generating fields using AI...', 'yellow');
+  logMessage('Generating fields using AI...');
 
   const prompt = fields.trim() ? `Create a ${modelName} Mongoose schema with fields: ${fields}`
     : `Create a ${modelName} Mongoose schema with appropriate fields for this type of model. Generate between 3 and 6 fields.`;
@@ -73,12 +73,11 @@ const addMongooseModel = async () => {
     const { value: MARKCN_OPENAI_API_KEY } = await getEnvVariable('MARKCN_OPENAI_API_KEY');
 
     // Step 1: Ask the user for the model name and fields
-    const { modelName, fields } = await inquirer.prompt([
+    let { modelName, fields } = await inquirer.prompt([
       {
         type: 'input',
         name: 'modelName',
         message: 'Please enter the name of the model:',
-        parse: (input) => input.toLowerCase(),
         validate: (input) => {
           if (!input.trim()) {
             return 'Model name cannot be empty.';
@@ -95,15 +94,14 @@ const addMongooseModel = async () => {
     ]);
 
     let mongooseSchema;
+    modelName = modelName.toLowerCase();
 
     if (MARKCN_OPENAI_API_KEY) {
 
       mongooseSchema = await generateMongooseSchema(modelName, fields);
 
-      logMessage('Generated schema:', 'cyan');
-
       mongooseSchema.fields.forEach(({ name, type }) => {
-        logMessage(`${name}: ${type}`, 'cyan');
+        logMessage(`${name}: ${type}`, 'write');
       });
 
     }
@@ -117,7 +115,7 @@ const addMongooseModel = async () => {
     const fileAlreadyExists = await fileExists(filePath);
 
     if (fileAlreadyExists) {
-      logMessage(`Error: Model file already exists at ${filePath}. Operation aborted.`, 'red');
+      logMessage(`Error: Model file already exists at ${filePath}. Operation aborted.`, 'error');
       return;
     }
 
@@ -131,10 +129,10 @@ const addMongooseModel = async () => {
     // Step 8: Write the model file based on module type (ESM or CommonJS)
     await fs.writeFile(filePath, fileContent);
 
-    logMessage(`Model file created at ${filePath}`, 'green');
+    logMessage(`Model file created at ${filePath}`, 'write');
     
   } catch (error) {
-    logMessage(`Error creating model: ${error.message}`, 'red');
+    logMessage(`Error creating model: ${error.message}`, 'error');
   }
 };
 

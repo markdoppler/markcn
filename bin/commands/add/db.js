@@ -12,13 +12,13 @@ const exec = promisify(execCallback); // Promisify the exec function to use it w
 // Function to test MongoDB connection
 const testMongoDBConnection = async (uri) => {
   try {
-    logMessage('Testing MongoDB connection...', 'cyan');
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    logMessage('MongoDB connection successful.', 'green');
+    logMessage('Testing MongoDB connection...');
+    await mongoose.connect(uri, { });
+    logMessage('MongoDB connection successful.');
     mongoose.connection.close();
     return true;
   } catch (error) {
-    logMessage('MongoDB connection failed: ' + error.message, 'red');
+    logMessage('MongoDB connection failed: ' + error.message, 'error');
     return false;
   }
 };
@@ -27,13 +27,11 @@ const testMongoDBConnection = async (uri) => {
 const installMongoDB = async (uri) => {
   try {
     
-    logMessage('Installing MongoDB (Mongoose)...', 'cyan');
+    logMessage('Installing MongoDB (Mongoose)...', 'npm');
     await exec('npm install mongoose'); // Install Mongoose for MongoDB
-    logMessage('MongoDB (Mongoose) installed.', 'green');
 
     // Read the module type (ESM or CommonJS) from package.json
     const moduleType = await getModuleType();
-    logMessage(`Detected module type: ${moduleType}`, 'blue');
 
     // Define the templates directory
     const templatesDir = path.join(__dirname, '../templates/add/db');
@@ -44,7 +42,7 @@ const installMongoDB = async (uri) => {
     // Save the configuration file to src/libs/mongodb.js
     const rootPath = await getRootPath();
     await fs.writeFile(path.join(rootPath, 'src', 'libs', 'mongodb.js'), mongodbTemplate);
-    logMessage('MongoDB configuration file created at src/libs/mongodb.js.', 'green');
+    logMessage('MongoDB configuration file created at src/libs/mongodb.js.', 'write');
 
     // Add the MongoDB import in app.js using the addImport function
     await addImport('./src/libs/mongodb.js'); // Call the generic function to add the import
@@ -53,7 +51,7 @@ const installMongoDB = async (uri) => {
     await addEnvVariable('MONGODB_URI', uri); // Call the generic function to add the environment variable
 
   } catch (error) {
-    logMessage(`Error during MongoDB installation: ${error.message}`, 'red');
+    logMessage(`Error during MongoDB installation: ${error.message}`, 'error');
   }
 };
 
@@ -91,13 +89,13 @@ const addDb = async () => {
         // If the connection is successful, proceed with installation
         await installMongoDB(uri);
       } else {
-        logMessage('MongoDB setup aborted due to failed connection.', 'red');
+        logMessage('MongoDB setup aborted due to failed connection.', 'error');
       }
     } else if (answers.dbType === 'MySQL') {
       console.log('MySQL installation is not yet implemented.');
     }
   } catch (error) {
-    logMessage(`Error: ${error.message}`, 'red');
+    logMessage(`Error: ${error.message}`, 'error');
   }
 };
 

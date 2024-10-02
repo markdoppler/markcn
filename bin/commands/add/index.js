@@ -18,7 +18,7 @@ function addCommand(module) {
     if (commands[module]) {
         commands[module]();
     } else {
-        logMessage(`The module "${module}" is not available.`, 'red');
+        logMessage(`The module "${module}" is not available.`, 'error');
     }
         
 

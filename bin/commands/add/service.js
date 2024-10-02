@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 const generateServiceFunctions = async (serviceName, prompt) => {
 
-  logMessage('Generating functions using AI...', 'yellow');
+  logMessage('Generating functions using AI...');
 
   const serviceFunctionsSchema = z.object({
     functions: z.array(
@@ -32,9 +32,16 @@ const generateServiceFunctions = async (serviceName, prompt) => {
 
       The parameters of the function must be named in camelCase
 
-      Function parameters should be clear and descriptive, not mixed with direct controller functions
+      Function parameters should be clear and descriptive, not mixed with direct controller functions.
+
+      The function name should be short and descriptive.
       `,
     zodName: 'serviceFunctions',
+  });
+
+  // logMessage for
+  functions.forEach(({ functionName, parameters }) => {
+    logMessage(`Function: ${functionName}({ ${parameters.map(({ name }) => name).join(', ')} })`, "write");
   });
 
   return functions;
@@ -106,7 +113,7 @@ const addService = async () => {
     const fileAlreadyExists = await fileExists(filePath);
 
     if (fileAlreadyExists) {
-      logMessage(`Error: Service file already exists at ${filePath}. Operation aborted.`, 'red');
+      logMessage(`Error: Service file already exists at ${filePath}. Operation aborted.`, "error");
       return;
     }
 
@@ -125,10 +132,10 @@ const addService = async () => {
     // Step 6: Write the generated content to the service file
     await fs.writeFile(filePath, fileContent);
 
-    logMessage(`Service file created at ${filePath}`, 'green');
+    logMessage(`Service file created at ${filePath}`, 'write');
 
   } catch (error) {
-    logMessage(`Error creating service: ${error.message}`, 'red');
+    logMessage(`Error creating service: ${error.message}`, 'error');
   }
 };
 
