@@ -52,11 +52,11 @@ const generateServiceTemplate = (serviceName, functions, moduleType) => {
 
   const commonJsTemplateContent = `const ${serviceName}Service = {};
 
-    ${functions ? functions.map(({ functionName, parameters }) => {
-    return `${serviceName}Service.${functionName} = ({ ${parameters.map(({ name }) => name).join('\n')} }) => {
+${functions ? functions.map(({ functionName, parameters }) => {
+    return `${serviceName}Service.${functionName} = ({ ${parameters.map(({ name }) => name).join(', ')} }) => {
   // Implement the ${functionName} function here
-}`;
-  }) : ""} 
+};`;
+  }).join('\n\n') : ""} 
 
 export default ${serviceName}Service;`;
 
